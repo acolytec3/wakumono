@@ -10,6 +10,11 @@ export type ethIdentity = {
   address: string
 }
 
+export type message = {
+  from: string,
+  message: string
+}
+
 export type globalState = {
     web3?: ethers.providers.Web3Provider,
     address?: string,
@@ -18,11 +23,13 @@ export type globalState = {
     keys?: ethIdentity,
     addressBook?: {
       [key: string]: string
-    }
+    },
+    messageList: message[]
   }
   
   export const initialState = {
-    addressBook: {}
+    addressBook: {},
+    messageList: []
   }
   
   
@@ -45,6 +52,9 @@ export type globalState = {
       }
       case 'ADD_PEER': {
         return {...state, addressBook: Object.assign(state.addressBook, action.payload)}
+      }
+      case 'ADD_MESSAGE': { 
+        return {...state, messageList: [...state.messageList, action.payload]}
       }
       default:
         return state;

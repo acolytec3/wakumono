@@ -14,6 +14,7 @@ import WalletDisplay from "./components/walletDisplay";
 import GlobalContext, { initialState, reducer } from "./context/globalContext";
 import { encryptMessage } from "./helpers/helpers";
 import EthCrypto from 'eth-crypto';
+import ChatBox from "./components/chatBox";
 
 let web3: ethers.providers.Web3Provider;
 
@@ -28,7 +29,6 @@ function App() {
   const handleRelayMessage = async (wakuMsg: WakuMessage) => {
     try {
       const msg = JSON.parse(wakuMsg.payloadAsUtf8);
-      console.log(msg);
       if (msg.chatKey) {
         dispatch({
           type: "ADD_PEER",
@@ -42,6 +42,7 @@ function App() {
           const decryptedPayload = JSON.parse(decryptedMessage);
           const senderAddress = ethers.utils.verifyMessage(decryptedPayload.message, decryptedPayload.signature);
           console.log(`Got a secret message: ${decryptedPayload.message} from ${senderAddress}`);
+          dispatch({ type: 'ADD_MESSAGE', payload: { from: senderAddress ?? 'nobody', message: decryptedPayload.message}})
         }
         catch (err) {
           console.log(err);
@@ -241,6 +242,7 @@ function App() {
                 Send Message
               </Button>
             </HStack>
+            <ChatBox />
           </VStack>
         </Center>
       </GlobalContext.Provider>
