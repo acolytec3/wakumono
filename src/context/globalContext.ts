@@ -3,14 +3,19 @@ import { ethers } from 'ethers'
 
 import React from 'react'
 import { Waku } from 'js-waku';
-import crypto from 'libp2p-crypto';
+
+export type ethIdentity = {
+  privateKey: string,
+  publicKey: string,
+  address: string
+}
 
 export type globalState = {
     web3?: ethers.providers.Web3Provider,
     address?: string,
     onboard?: any,
     waku?: Waku,
-    keys?: crypto.keys.supportedKeys.rsa.RsaPrivateKey,
+    keys?: ethIdentity,
     addressBook?: {
       [key: string]: string
     }

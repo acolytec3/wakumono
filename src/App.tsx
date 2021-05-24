@@ -7,15 +7,14 @@ import {
 } from "@chakra-ui/react";
 import Onboard from "bnc-onboard";
 import { ethers } from "ethers";
-//@ts-ignore
-import { getKeyPairFromSeed } from "human-crypto-keys";
 import { getStatusFleetNodes, StoreCodec, Waku, WakuMessage } from "js-waku";
-import crypto from "libp2p-crypto";
 import PeerId from "peer-id";
 import React from "react";
 import WalletDisplay from "./components/walletDisplay";
 import GlobalContext, { initialState, reducer } from "./context/globalContext";
 import { encryptMessage } from "./helpers/helpers";
+import EthCrypto from 'eth-crypto';
+
 let web3: ethers.providers.Web3Provider;
 
 export const ChatContentTopic = "dingus";
@@ -26,9 +25,10 @@ function App() {
   const [toAddress, setTo] = React.useState("");
   const toast = useToast();
 
-  const handleRelayMessage = (wakuMsg: WakuMessage) => {
+  const handleRelayMessage = async (wakuMsg: WakuMessage) => {
     try {
       const msg = JSON.parse(wakuMsg.payloadAsUtf8);
+      console.log(msg);
       if (msg.chatKey) {
         dispatch({
           type: "ADD_PEER",
@@ -38,8 +38,10 @@ function App() {
     } catch (err) {
       if (wakuMsg.payload && state.keys) {
         try {
-          const decryptedMessage = state.keys!.decrypt(wakuMsg.payload);
-          console.log('got secret message!', new TextDecoder().decode(decryptedMessage));
+          const decryptedMessage = await EthCrypto.decryptWithPrivateKey(state.keys!.privateKey,EthCrypto.cipher.parse(wakuMsg.payloadAsUtf8));
+          const decryptedPayload = JSON.parse(decryptedMessage);
+          const senderAddress = ethers.utils.verifyMessage(decryptedPayload.message, decryptedPayload.signature);
+          console.log(`Got a secret message: ${decryptedPayload.message} from ${senderAddress}`);
         }
         catch (err) {
           console.log(err);
@@ -49,8 +51,13 @@ function App() {
   };
 
   const handleMessageSend = async (to: string, msgText: string) => {
-    const encryptedMessage = await encryptMessage(state.addressBook![to.toLowerCase()], msgText);
-    const msg = WakuMessage.fromBytes(encryptedMessage, ChatContentTopic);
+    if (!state.web3) {
+      return;
+    }
+
+    const sig = await state.web3.getSigner().signMessage(msgText);
+    const encryptedMessage = await encryptMessage(state.addressBook![to.toLowerCase()], msgText, sig);
+    const msg = WakuMessage.fromUtf8String(encryptedMessage, ChatContentTopic);
     state.waku?.relay.send(msg);
   };
 
@@ -165,13 +172,8 @@ function App() {
     let signature = await web3
       .getSigner()
       .signMessage("make it so, Number One");
-    let chatKeyPair = await getKeyPairFromSeed(
-      signature,
-      { id: "rsa", modulusLength: 1024 },
-      { privateKeyFormat: "pkcs1-pem" }
-    );
-    let privateKey = await crypto.keys.import(chatKeyPair.privateKey, "");
-    dispatch({ type: "SET_KEYS", payload: { keys: privateKey } });
+    let chatKeyPair = await EthCrypto.createIdentity(Buffer.from(signature));
+    dispatch({ type: "SET_KEYS", payload: { keys: chatKeyPair } });
   };
 
   const broadcastChatKey = async () => {
@@ -179,21 +181,18 @@ function App() {
       return;
     }
     
-    const chatKeyID = await PeerId.createFromPrivKey(state.keys.bytes);
-    const chatPubKey = chatKeyID.toJSON().pubKey;
     const signedPubKeysignature = await web3
       .getSigner()
-      .signMessage(chatPubKey!);
+      .signMessage(state.keys.address);
     const msg = WakuMessage.fromUtf8String(
       JSON.stringify({
         address: state.address,
-        chatKey: chatPubKey,
+        chatKey: state.keys.publicKey,
         signature: signedPubKeysignature,
       }),
       ChatContentTopic
     );
     state.waku?.relay.send(msg);
-
   };
 
   const handleConnect = async () => {
@@ -220,6 +219,7 @@ function App() {
             <Heading>WakuMono</Heading>
             <WalletDisplay handleConnect={handleConnect} />
             <Button onClick={startUp}>Connect to Waku</Button>
+            <Button onClick={broadcastChatKey}>Broadcast ChatKey</Button>
             <HStack>
               <VStack>
               <Input

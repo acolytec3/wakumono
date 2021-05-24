@@ -1,6 +1,4 @@
-import { ethers, BigNumber } from 'ethers';
-import PeerId from 'peer-id';
-import crypto from 'libp2p-crypto';
+import EthCrypto from 'eth-crypto';
 
 export const formatAddress = (address: string) => {
     return (
@@ -8,9 +6,13 @@ export const formatAddress = (address: string) => {
     );
   };
   
-export const encryptMessage = async (publicKey: string, message: string) => {
-  const pubID = await PeerId.createFromPubKey(publicKey);
-  const encryptionKey = crypto.keys.unmarshalPublicKey(pubID.marshalPubKey()) as crypto.keys.supportedKeys.rsa.RsaPublicKey;
-  const secretMessage = encryptionKey.encrypt(new TextEncoder().encode(message));
-  return secretMessage;
+export const encryptMessage = async (publicKey: string, message: string, signature: string) => {
+  console.log(publicKey);
+
+  const payload = {
+    message: message,
+    signature: signature
+  }
+  const encryptedMessage = await EthCrypto.encryptWithPublicKey(publicKey, JSON.stringify(payload));
+  return EthCrypto.cipher.stringify(encryptedMessage);
 }
