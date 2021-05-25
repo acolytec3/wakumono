@@ -24,11 +24,15 @@ export type globalState = {
     addressBook?: {
       [key: string]: string
     },
+    reverseAddressBook?: {
+      [key: string]: string
+    },
     messageList: message[]
   }
   
   export const initialState = {
     addressBook: {},
+    reverseAddressBook: {},
     messageList: []
   }
   
@@ -51,7 +55,9 @@ export type globalState = {
         return { ...state, keys: action.payload.keys };
       }
       case 'ADD_PEER': {
-        return {...state, addressBook: Object.assign(state.addressBook, action.payload)}
+        let reverseAddress = { [Object.values(action.payload)[0] as string] : Object.keys(action.payload)[0] };
+        console.log(reverseAddress);
+        return {...state, addressBook: Object.assign(state.addressBook, action.payload), reverseAddressBook: Object.assign(state.reverseAddressBook, reverseAddress)}
       }
       case 'ADD_MESSAGE': { 
         return {...state, messageList: [...state.messageList, action.payload]}

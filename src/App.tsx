@@ -15,10 +15,10 @@ import PeerId from "peer-id";
 import React from "react";
 import WalletDisplay from "./components/walletDisplay";
 import GlobalContext, { initialState, reducer } from "./context/globalContext";
-import { encryptMessage } from "./helpers/helpers";
 import EthCrypto from "eth-crypto";
 import ChatBox from "./components/chatBox";
 import { Direction } from "js-waku/build/main/lib/waku_store/history_rpc";
+import { formatAddress } from "./helpers/helpers";
 
 let web3: ethers.providers.Web3Provider;
 
@@ -26,29 +26,48 @@ export const ChatContentTopic = "wakumono/dm";
 export const AddressBroadcastTopic = "wakumono/broadcast";
 function App() {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const [msgText, setMsg] = React.useState("");
-  const [toAddress, setTo] = React.useState("");
   const toast = useToast();
 
   const handleChatMessage = async (wakuMsg: WakuMessage) => {
-    if (wakuMsg.payload && state.keys) {
+    if (wakuMsg.payload && state.keys && state.reverseAddressBook) {
       try {
         const decryptedMessage = await EthCrypto.decryptWithPrivateKey(
           state.keys!.privateKey,
           EthCrypto.cipher.parse(wakuMsg.payloadAsUtf8)
         );
         const decryptedPayload = JSON.parse(decryptedMessage);
-        const senderAddress = ethers.utils.verifyMessage(
-          decryptedPayload.message,
-          decryptedPayload.signature
-        );
-        console.log(
-          `Got a secret message: ${decryptedPayload.message} from ${senderAddress}`
-        );
+        const childKeyVer = EthCrypto.recoverPublicKey(decryptedPayload.childSig, EthCrypto.hash.keccak256(decryptedPayload.message));
         dispatch({
           type: "ADD_MESSAGE",
-          payload: { from: senderAddress, message: decryptedPayload.message },
+          payload: { from: state.reverseAddressBook[childKeyVer], message: decryptedPayload.message },
         });
+        toast({
+          position: "bottom",
+          title: "Message received from " + formatAddress(state.reverseAddressBook[childKeyVer]),
+          description: decryptedPayload.message,
+          status: 'success',
+          duration: 3000,
+          isClosable: true
+        })
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+  const handleHistoricalChatMessage = async (wakuMsg: WakuMessage) => {
+    if (wakuMsg.payload && state.keys && state.reverseAddressBook) {
+      try {
+        const decryptedMessage = await EthCrypto.decryptWithPrivateKey(
+          state.keys!.privateKey,
+          EthCrypto.cipher.parse(wakuMsg.payloadAsUtf8)
+        );
+        const decryptedPayload = JSON.parse(decryptedMessage);
+        const childKeyVer = EthCrypto.recoverPublicKey(decryptedPayload.childSig, EthCrypto.hash.keccak256(decryptedPayload.message));
+        dispatch({
+          type: "ADD_MESSAGE",
+          payload: { from: state.reverseAddressBook[childKeyVer], message: decryptedPayload.message },
+        });
+
       } catch (err) {
         console.log(err);
       }
@@ -69,21 +88,6 @@ function App() {
     }
   };
 
-  const handleMessageSend = async (to: string, msgText: string) => {
-    if (!state.web3) {
-      return;
-    }
-
-    const sig = await state.web3.getSigner().signMessage(msgText);
-    const encryptedMessage = await encryptMessage(
-      state.addressBook![to.toLowerCase()],
-      msgText,
-      sig
-    );
-    const msg = WakuMessage.fromUtf8String(encryptedMessage, ChatContentTopic);
-    state.waku?.relay.send(msg);
-  };
-
   const handleProtocolChange = async (
     waku: Waku,
     { peerId, protocols }: { peerId: PeerId; protocols: string[] }
@@ -96,7 +100,10 @@ function App() {
           direction: Direction.FORWARD
         });
         if (response) {
-          response.map((wakuMsg) => handleAddressBroadcastMessage(wakuMsg));
+          await response.map((wakuMsg) => handleAddressBroadcastMessage(wakuMsg));
+          if (!state.addressBook![state.address!]) {
+            await broadcastChatKey();
+          }
         }
       } catch (e) {
         console.log(
@@ -110,7 +117,7 @@ function App() {
           contentTopics: [ChatContentTopic],
         });
         if (response) {
-          response.map((wakuMsg) => handleChatMessage(wakuMsg));
+          response.map((wakuMsg) => handleHistoricalChatMessage(wakuMsg));
         }
       } catch (e) {
         console.log(
@@ -130,12 +137,12 @@ function App() {
           },
         },
       });
-/*
+
       waku.addPeerToAddressBook(
         "16Uiu2HAmPLe7Mzm8TsYUubgCAW1aJoeFScxrLj8ppHFivPo97bUZ",
         ["/dns4/node-01.do-ams3.jdev.misc.statusim.net/tcp/7010/wss"]
       );
-*/
+
       waku.addPeerToAddressBook("16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA",
         ["/dns4/node-01.gc-us-central1-a.wakuv2.prod.statusim.net/tcp/443/wss/p2p/16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA"]
       )
@@ -263,27 +270,6 @@ function App() {
             <WalletDisplay handleConnect={handleConnect} />
             <Button onClick={startUp}>Connect to Waku</Button>
             <Button onClick={broadcastChatKey}>Broadcast ChatKey</Button>
-            <HStack>
-              <VStack>
-                <Input
-                  value={toAddress}
-                  placeholder="Address"
-                  onChange={(evt) => setTo(evt.target.value)}
-                />
-              </VStack>
-              <Input
-                value={msgText}
-                placeholder="Enter a message"
-                onChange={(evt) => setMsg(evt.target.value)}
-              />
-              <Button
-                onClick={() => {
-                  handleMessageSend(toAddress, msgText);
-                }}
-              >
-                Send Message
-              </Button>
-            </HStack>
             <ChatBox />
           </VStack>
         </Center>
