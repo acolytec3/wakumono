@@ -11026,10 +11026,10 @@ js-tokens@^3.0.2:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.2.tgz#9866df395102130e38f7f996bceb65443209c25b"
   integrity sha1-mGbfOVECEw449/mWvOtlRDIJwls=
 
-js-waku@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/js-waku/-/js-waku-0.4.0.tgz#f23cf381e11f12725a29fcd81d6579cfd215b590"
-  integrity sha512-BZ8Cf7coqDPmAEkKVTT2AqAZowGY4VvEJ6uzCYKOjQiGhHVQk58VFrbOLf23Zo/sT00giG3UmoyNV4X1oGu76g==
+js-waku@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/js-waku/-/js-waku-0.5.0.tgz#a9ddc00242f74940374740c103cdf45bb1e1b38a"
+  integrity sha512-rkuPCPxyecFox9VjVbJlfgT5GQiBGJQzC2/Q9JlHLECUv+NNW7lZyUkDFM7vNBSrrYB1IoxBilGWF/mYwtbb7w==
   dependencies:
     axios "^0.21.1"
     debug "^4.3.1"

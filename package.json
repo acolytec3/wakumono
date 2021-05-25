@@ -18,7 +18,7 @@
     "eth-crypto": "^1.9.0",
     "ethers": "^5.0.32",
     "framer-motion": "^3.10.2",
-    "js-waku": "^0.4.0",
+    "js-waku": "^0.5.0",
     "multiaddr": "^9.0.1",
     "peer-id": "^0.14.8",
     "react": "^17.0.1",
@@ -33,7 +33,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build"
+    "deploy": "react-scripts build && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -7,8 +7,6 @@ export const formatAddress = (address: string) => {
   };
   
 export const encryptMessage = async (publicKey: string, message: string, signature: string) => {
-  console.log(publicKey);
-
   const payload = {
     message: message,
     signature: signature
