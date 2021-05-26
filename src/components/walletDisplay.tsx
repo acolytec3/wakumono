@@ -35,7 +35,7 @@ const WalletDisplay: React.FC<WalletProps> = ({ handleConnect }) => {
       {state.address ? (
         <Popover placement="top">
           <PopoverTrigger>
-            <Button w="250px">
+            <Button w="200px">
               {formatAddress(state.address)}
             </Button>
           </PopoverTrigger>
@@ -53,7 +53,7 @@ const WalletDisplay: React.FC<WalletProps> = ({ handleConnect }) => {
           </PopoverContent>
         </Popover>
       ) : (
-        <Button w="250px" onClick={handleConnect}>
+        <Button w="200px" onClick={handleConnect}>
           Connect Web3
         </Button>
       )}

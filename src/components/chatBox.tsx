@@ -1,17 +1,21 @@
 import {
+  Box,
+  Center,
   FormControl,
   FormErrorMessage,
-
+  Heading,
   HStack,
   IconButton,
   Input,
   SlideFade,
-  Text,
-  VStack
+  VStack,
+  Text
 } from "@chakra-ui/react";
 import { WakuMessage } from "js-waku";
 import React from "react";
 import { BiMailSend } from "react-icons/bi";
+//@ts-ignore
+import Jazzicon, { jsNumberForAddress } from 'react-jazzicon'
 import { ChatContentTopic } from "../App";
 import GlobalContext, { message } from "../context/globalContext";
 import { encryptMessage, formatAddress } from "../helpers/helpers";
@@ -50,7 +54,7 @@ const ChatBox = () => {
   };
 
   return (
-    <VStack>
+    <VStack mw="90vw">
       <FormControl
         minHeight="100px"
         isInvalid={
@@ -86,13 +90,21 @@ const ChatBox = () => {
         </SlideFade>
       </FormControl>
 
+      <Heading>Inbox</Heading>
+      <HStack w="75vw" spacing="24px">
+        <Box fontWeight="bold" w="150px">
+          Sender
+        </Box>
+        <Box fontWeight="bold">Message</Box>
+      </HStack>
       {messageList.map((msg: message) => {
         return (
-          <HStack align="start" key={msg.from + Math.random().toFixed(10)}>
-            <Text>
-              {formatAddress(state.reverseAddressBook![msg.from])}:{" "}
-              {msg.message}
-            </Text>
+          <HStack w="75vw" spacing="24px">
+            <HStack w="150px">
+              <Jazzicon diameter={20} seed={jsNumberForAddress(msg.from)} />
+              <Text>{formatAddress(state.reverseAddressBook![msg.from])}</Text>
+            </HStack>
+            <Box>{msg.message}</Box>
           </HStack>
         );
       })}

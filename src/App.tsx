@@ -252,7 +252,7 @@ function App() {
 
   return (
     <GlobalContext.Provider value={{ dispatch, state }}>
-      <Center h="90vh">
+      <Center h="90vh" mw="95vw">
         <VStack>
           <Heading>WakuMono</Heading>
           <HStack>
