@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Button,
-  Heading,
-  HStack,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Button, Heading, HStack, Input, Text, VStack } from "@chakra-ui/react";
 import GlobalContext, { message } from "../context/globalContext";
 import { encryptMessage, formatAddress } from "../helpers/helpers";
 import { ChatContentTopic } from "../App";
@@ -19,21 +12,27 @@ const ChatBox = () => {
   const [toAddress, setTo] = React.useState("");
 
   React.useEffect(() => {
-    setList(state.messageList);
+    const updatedList = state.messageList.length < 10 ? state.messageList : state.messageList.slice(state.messageList.length - 11)
+    setList(updatedList);
   }, [state.messageList]);
 
   const handleMessageSend = async (to: string, msgText: string) => {
     if (!state.web3 || !state.keys) {
       return;
     }
+
+    if (!state.addressBook![to.toLowerCase()]) {
+      console.log('no address found');
+      return;
+    }
     const encryptedMessage = await encryptMessage(
       state.keys,
       state.addressBook![to.toLowerCase()],
-      msgText,
+      msgText
     );
     const msg = WakuMessage.fromUtf8String(encryptedMessage, ChatContentTopic);
     state.waku?.relay.send(msg);
-    setMsg('');
+    setMsg("");
   };
 
   return (
@@ -52,6 +51,7 @@ const ChatBox = () => {
           onChange={(evt) => setMsg(evt.target.value)}
         />
         <Button
+          minWidth="150px"
           onClick={() => {
             handleMessageSend(toAddress, msgText);
           }}
@@ -62,9 +62,9 @@ const ChatBox = () => {
 
       {messageList.map((msg: message) => {
         return (
-          <HStack key={msg.from+Math.random()}>
+          <HStack align="start" key={msg.from + Math.random().toFixed(10)}>
             <Text>
-              {formatAddress(msg.from)}: {msg.message}
+              {formatAddress(state.reverseAddressBook![msg.from])}: {msg.message}
             </Text>
           </HStack>
         );

@@ -5,12 +5,19 @@ import {
   Heading,
   HStack,
   Input,
+  SlideFade,
   useToast,
   VStack,
 } from "@chakra-ui/react";
 import Onboard from "bnc-onboard";
 import { ethers } from "ethers";
-import { Environment, getStatusFleetNodes, StoreCodec, Waku, WakuMessage } from "js-waku";
+import {
+  Environment,
+  getStatusFleetNodes,
+  StoreCodec,
+  Waku,
+  WakuMessage,
+} from "js-waku";
 import PeerId from "peer-id";
 import React from "react";
 import WalletDisplay from "./components/walletDisplay";
@@ -36,19 +43,27 @@ function App() {
           EthCrypto.cipher.parse(wakuMsg.payloadAsUtf8)
         );
         const decryptedPayload = JSON.parse(decryptedMessage);
-        const childKeyVer = EthCrypto.recoverPublicKey(decryptedPayload.childSig, EthCrypto.hash.keccak256(decryptedPayload.message));
+        const childKeyVer = EthCrypto.recoverPublicKey(
+          decryptedPayload.childSig,
+          EthCrypto.hash.keccak256(decryptedPayload.message)
+        );
         dispatch({
           type: "ADD_MESSAGE",
-          payload: { from: state.reverseAddressBook[childKeyVer], message: decryptedPayload.message },
+          payload: {
+            from: state.reverseAddressBook[childKeyVer],
+            message: decryptedPayload.message,
+          },
         });
         toast({
           position: "bottom",
-          title: "Message received from " + formatAddress(state.reverseAddressBook[childKeyVer]),
+          title:
+            "Message received from " +
+            formatAddress(state.reverseAddressBook[childKeyVer]),
           description: decryptedPayload.message,
-          status: 'success',
+          status: "success",
           duration: 3000,
-          isClosable: true
-        })
+          isClosable: true,
+        });
       } catch (err) {
         console.log(err);
       }
@@ -62,12 +77,17 @@ function App() {
           EthCrypto.cipher.parse(wakuMsg.payloadAsUtf8)
         );
         const decryptedPayload = JSON.parse(decryptedMessage);
-        const childKeyVer = EthCrypto.recoverPublicKey(decryptedPayload.childSig, EthCrypto.hash.keccak256(decryptedPayload.message));
+        const childKeyVer = EthCrypto.recoverPublicKey(
+          decryptedPayload.childSig,
+          EthCrypto.hash.keccak256(decryptedPayload.message)
+        );
         dispatch({
           type: "ADD_MESSAGE",
-          payload: { from: state.reverseAddressBook[childKeyVer], message: decryptedPayload.message },
+          payload: {
+            from: childKeyVer ?? 'unknown sender',
+            message: decryptedPayload.message,
+          },
         });
-
       } catch (err) {
         console.log(err);
       }
@@ -97,13 +117,12 @@ function App() {
         const response = await waku.store.queryHistory({
           peerId: peerId,
           contentTopics: [AddressBroadcastTopic],
-          direction: Direction.FORWARD
+          direction: Direction.FORWARD,
         });
         if (response) {
-          await response.map((wakuMsg) => handleAddressBroadcastMessage(wakuMsg));
-          if (!state.addressBook![state.address!]) {
-            await broadcastChatKey();
-          }
+          await response.map((wakuMsg) =>
+            handleAddressBroadcastMessage(wakuMsg)
+          );
         }
       } catch (e) {
         console.log(
@@ -143,11 +162,14 @@ function App() {
         ["/dns4/node-01.do-ams3.jdev.misc.statusim.net/tcp/7010/wss"]
       );
 
-      waku.addPeerToAddressBook("16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA",
-        ["/dns4/node-01.gc-us-central1-a.wakuv2.prod.statusim.net/tcp/443/wss/p2p/16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA"]
-      )
-     
-/*    
+      waku.addPeerToAddressBook(
+        "16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA",
+        [
+          "/dns4/node-01.gc-us-central1-a.wakuv2.prod.statusim.net/tcp/443/wss/p2p/16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA",
+        ]
+      );
+
+      /*    
       const nodes = await getStatusFleetNodes(Environment.Prod);
       await Promise.all(
         nodes.map((addr) => {
@@ -168,15 +190,6 @@ function App() {
       console.log("Issue starting waku ", e);
     }
   };
-
-  React.useEffect(() => {
-    return () => {
-      state.waku?.libp2p.peerStore.removeListener(
-        "change:protocols",
-        handleProtocolChange.bind({}, state.waku)
-      );
-    };
-  }, []);
 
   const deriveChatKey = async () => {
     let signature = await web3
@@ -206,17 +219,12 @@ function App() {
   };
 
   const handleConnect = async () => {
-    const wallets = [{ walletName: "metamask", preferred: true }];
+    const wallets = [{ walletName: "metamask", preferred: true }, { walletName: "status", preferred: true}];
     const onboard = Onboard({
       networkId: 1,
       subscriptions: {
         wallet: async (wallet) => {
           try {
-            //@ts-ignore
-            if (window.ethereum) {
-              //@ts-ignore
-              window.ethereum.enable();
-            }
             web3 = new ethers.providers.Web3Provider(wallet.provider);
             dispatch({ type: "SET_WEB3", payload: { web3: web3 } });
             deriveChatKey();
@@ -245,7 +253,7 @@ function App() {
         wallets: wallets,
       },
     });
-  
+
     dispatch({ type: "SET_ONBOARD", payload: { onboard: onboard } });
     try {
       const walletSelected = await onboard.walletSelect();
@@ -267,10 +275,17 @@ function App() {
         <Center h="90vh">
           <VStack>
             <Heading>WakuMono</Heading>
-            <WalletDisplay handleConnect={handleConnect} />
-            <Button onClick={startUp}>Connect to Waku</Button>
-            <Button onClick={broadcastChatKey}>Broadcast ChatKey</Button>
-            <ChatBox />
+            <HStack>
+              <WalletDisplay handleConnect={handleConnect} />
+              <Button disabled={!state.keys} onClick={startUp}>
+                Connect to Waku
+              </Button>
+              <Button disabled={state.addressBook![state.address!] !== undefined} onClick={broadcastChatKey}>Broadcast Chatkey</Button>
+
+            </HStack>
+            <SlideFade in={state.waku !== undefined}>
+              <ChatBox />
+            </SlideFade>
           </VStack>
         </Center>
       </GlobalContext.Provider>

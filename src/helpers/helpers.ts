@@ -3,7 +3,7 @@ import { ethIdentity } from '../context/globalContext';
 
 export const formatAddress = (address: string) => {
     return (
-      address.substring(0, 4) + "..." + address.substring(address.length - 4)
+      address ? address.substring(0, 4) + "..." + address.substring(address.length - 4) : 'Unknown Sender'
     );
   };
   
