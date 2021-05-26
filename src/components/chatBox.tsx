@@ -1,18 +1,32 @@
+import {
+  FormControl,
+  FormErrorMessage,
+
+  HStack,
+  IconButton,
+  Input,
+  SlideFade,
+  Text,
+  VStack
+} from "@chakra-ui/react";
+import { WakuMessage } from "js-waku";
 import React from "react";
-import { Button, Heading, HStack, Input, Text, VStack } from "@chakra-ui/react";
+import { BiMailSend } from "react-icons/bi";
+import { ChatContentTopic } from "../App";
 import GlobalContext, { message } from "../context/globalContext";
 import { encryptMessage, formatAddress } from "../helpers/helpers";
-import { ChatContentTopic } from "../App";
-import { WakuMessage } from "js-waku";
 
 const ChatBox = () => {
-  const { state, dispatch } = React.useContext(GlobalContext);
+  const { state } = React.useContext(GlobalContext);
   const [messageList, setList] = React.useState<message[]>([]);
   const [msgText, setMsg] = React.useState("");
   const [toAddress, setTo] = React.useState("");
 
   React.useEffect(() => {
-    const updatedList = state.messageList.length < 10 ? state.messageList : state.messageList.slice(state.messageList.length - 11)
+    const updatedList =
+      state.messageList.length < 10
+        ? state.messageList
+        : state.messageList.slice(state.messageList.length - 11);
     setList(updatedList);
   }, [state.messageList]);
 
@@ -22,7 +36,7 @@ const ChatBox = () => {
     }
 
     if (!state.addressBook![to.toLowerCase()]) {
-      console.log('no address found');
+      console.log("no address found");
       return;
     }
     const encryptedMessage = await encryptMessage(
@@ -37,34 +51,47 @@ const ChatBox = () => {
 
   return (
     <VStack>
-      <HStack>
-        <VStack>
+      <FormControl
+        minHeight="100px"
+        isInvalid={
+          toAddress !== "" && state.addressBook![toAddress] === undefined
+        }
+      >
+        <HStack>
           <Input
             value={toAddress}
             placeholder="Address"
             onChange={(evt) => setTo(evt.target.value)}
           />
-        </VStack>
-        <Input
-          value={msgText}
-          placeholder="Enter a message"
-          onChange={(evt) => setMsg(evt.target.value)}
-        />
-        <Button
-          minWidth="150px"
-          onClick={() => {
-            handleMessageSend(toAddress, msgText);
-          }}
+          <Input
+            value={msgText}
+            placeholder="Enter a message"
+            onChange={(evt) => setMsg(evt.target.value)}
+          />
+          <IconButton
+            disabled={state.addressBook![toAddress.toLowerCase()] === undefined}
+            onClick={() => {
+              handleMessageSend(toAddress, msgText);
+            }}
+            aria-label="send message"
+            icon={<BiMailSend />}
+            variant="outline"
+            colorScheme="blackAlpha"
+          />
+        </HStack>
+        <SlideFade
+          in={toAddress !== "" && state.addressBook![toAddress] === undefined}
         >
-          Send Message
-        </Button>
-      </HStack>
+          <FormErrorMessage>Address not found</FormErrorMessage>
+        </SlideFade>
+      </FormControl>
 
       {messageList.map((msg: message) => {
         return (
           <HStack align="start" key={msg.from + Math.random().toFixed(10)}>
             <Text>
-              {formatAddress(state.reverseAddressBook![msg.from])}: {msg.message}
+              {formatAddress(state.reverseAddressBook![msg.from])}:{" "}
+              {msg.message}
             </Text>
           </HStack>
         );

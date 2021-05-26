@@ -10,7 +10,6 @@ import {
   PopoverArrow,
   PopoverCloseButton,
   Heading,
-  Text,
   VStack,
 } from "@chakra-ui/react";
 import GlobalContext from "../context/globalContext";

@@ -1,30 +1,22 @@
 import {
   Button,
   Center,
-  ChakraProvider,
   Heading,
   HStack,
-  Input,
   SlideFade,
   useToast,
   VStack,
 } from "@chakra-ui/react";
 import Onboard from "bnc-onboard";
+import EthCrypto from "eth-crypto";
 import { ethers } from "ethers";
-import {
-  Environment,
-  getStatusFleetNodes,
-  StoreCodec,
-  Waku,
-  WakuMessage,
-} from "js-waku";
+import { StoreCodec, Waku, WakuMessage } from "js-waku";
+import { Direction } from "js-waku/build/main/lib/waku_store/history_rpc";
 import PeerId from "peer-id";
 import React from "react";
+import ChatBox from "./components/chatBox";
 import WalletDisplay from "./components/walletDisplay";
 import GlobalContext, { initialState, reducer } from "./context/globalContext";
-import EthCrypto from "eth-crypto";
-import ChatBox from "./components/chatBox";
-import { Direction } from "js-waku/build/main/lib/waku_store/history_rpc";
 import { formatAddress } from "./helpers/helpers";
 
 let web3: ethers.providers.Web3Provider;
@@ -84,7 +76,7 @@ function App() {
         dispatch({
           type: "ADD_MESSAGE",
           payload: {
-            from: childKeyVer ?? 'unknown sender',
+            from: childKeyVer ?? "unknown sender",
             message: decryptedPayload.message,
           },
         });
@@ -219,7 +211,10 @@ function App() {
   };
 
   const handleConnect = async () => {
-    const wallets = [{ walletName: "metamask", preferred: true }, { walletName: "status", preferred: true}];
+    const wallets = [
+      { walletName: "metamask", preferred: true },
+      { walletName: "status", preferred: true },
+    ];
     const onboard = Onboard({
       networkId: 1,
       subscriptions: {
@@ -230,13 +225,6 @@ function App() {
             deriveChatKey();
           } catch (err) {
             console.log(err);
-            toast({
-              position: "top",
-              status: "error",
-              title: "Something went wrong",
-              description: err?.toString(),
-              duration: 5000,
-            });
           }
         },
         address: (address) => {
@@ -256,40 +244,35 @@ function App() {
 
     dispatch({ type: "SET_ONBOARD", payload: { onboard: onboard } });
     try {
-      const walletSelected = await onboard.walletSelect();
+      await onboard.walletSelect();
     } catch (err) {
       console.log(err);
-      toast({
-        position: "top",
-        status: "error",
-        title: "Something went wrong",
-        description: err?.toString(),
-        duration: 5000,
-      });
     }
   };
 
   return (
-    <ChakraProvider>
-      <GlobalContext.Provider value={{ dispatch, state }}>
-        <Center h="90vh">
-          <VStack>
-            <Heading>WakuMono</Heading>
-            <HStack>
-              <WalletDisplay handleConnect={handleConnect} />
-              <Button disabled={!state.keys} onClick={startUp}>
-                Connect to Waku
-              </Button>
-              <Button disabled={state.addressBook![state.address!] !== undefined} onClick={broadcastChatKey}>Broadcast Chatkey</Button>
-
-            </HStack>
-            <SlideFade in={state.waku !== undefined}>
-              <ChatBox />
-            </SlideFade>
-          </VStack>
-        </Center>
-      </GlobalContext.Provider>
-    </ChakraProvider>
+    <GlobalContext.Provider value={{ dispatch, state }}>
+      <Center h="90vh">
+        <VStack>
+          <Heading>WakuMono</Heading>
+          <HStack>
+            <WalletDisplay handleConnect={handleConnect} />
+            <Button disabled={!state.keys} onClick={startUp}>
+              Connect to Waku
+            </Button>
+            <Button
+              disabled={state.addressBook![state.address!] !== undefined}
+              onClick={broadcastChatKey}
+            >
+              Broadcast Chatkey
+            </Button>
+          </HStack>
+          <SlideFade in={state.waku !== undefined}>
+            <ChatBox />
+          </SlideFade>
+        </VStack>
+      </Center>
+    </GlobalContext.Provider>
   );
 }
 
