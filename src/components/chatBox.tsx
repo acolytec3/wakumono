@@ -85,7 +85,7 @@ const ChatBox = () => {
           />
         </HStack>
         <SlideFade
-          in={toAddress !== "" && state.addressBook![toAddress] === undefined}
+          in={toAddress !== "" && state.addressBook![toAddress.toLowerCase()] === undefined}
         >
           <FormErrorMessage>Address not found</FormErrorMessage>
         </SlideFade>
@@ -102,7 +102,7 @@ const ChatBox = () => {
         return (
           <HStack key={msg.from+Math.random()} w="75vw" spacing="24px">
             <HStack w="150px">
-              <Jazzicon diameter={20} seed={jsNumberForAddress(msg.from)} />
+              {msg.from && <Jazzicon diameter={20} seed={jsNumberForAddress(msg.from)} />}
               <Tooltip hasArrow label="Click to copy" aria-label="copy">
                 <Text cursor="pointer" onClick={() => navigator.clipboard.writeText(state.reverseAddressBook![msg.from])}>{formatAddress(state.reverseAddressBook![msg.from])}</Text>
               </Tooltip>

@@ -218,6 +218,7 @@ function App() {
     const wallets = [
       { walletName: "metamask", preferred: true },
       { walletName: "status", preferred: true },
+      { walletName: "trust", preferred: true }
     ];
     const onboard = Onboard({
       networkId: 1,
