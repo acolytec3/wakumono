@@ -2,12 +2,12 @@ import {
   Button,
   Center,
   Heading,
-  HStack,
+
   SlideFade,
   useToast,
   VStack,
   Wrap,
-  WrapItem,
+  WrapItem
 } from "@chakra-ui/react";
 import Onboard from "bnc-onboard";
 import EthCrypto from "eth-crypto";
@@ -92,11 +92,12 @@ function App() {
     try {
       const msg = JSON.parse(wakuMsg.payloadAsUtf8);
       if (msg.chatKey) {
+        if ((ethers.utils.verifyMessage(EthCrypto.publicKey.toAddress(msg.chatKey), msg.signature).toLowerCase() === msg.address.toLowerCase())) {
         dispatch({
           type: "ADD_PEER",
           payload: { [msg.address.toLowerCase()]: msg.chatKey },
         });
-      }
+      }}
     } catch (err) {
       console.log(err);
     }
@@ -140,7 +141,8 @@ function App() {
       }
     }
   };
-  const startUp = async () => {
+
+  const startWaku = async () => {
     try {
       const waku = await Waku.create({
         config: {
@@ -262,7 +264,7 @@ function App() {
               <WalletDisplay handleConnect={handleConnect} />
             </WrapItem>
             <WrapItem>
-              <Button disabled={!state.keys} onClick={startUp}>
+              <Button disabled={!state.keys} onClick={startWaku}>
                 Connect to Waku
               </Button>
             </WrapItem>
