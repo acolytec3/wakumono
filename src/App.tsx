@@ -6,6 +6,8 @@ import {
   SlideFade,
   useToast,
   VStack,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import Onboard from "bnc-onboard";
 import EthCrypto from "eth-crypto";
@@ -255,18 +257,24 @@ function App() {
       <Center h="90vh" mw="95vw">
         <VStack>
           <Heading>WakuMono</Heading>
-          <HStack>
-            <WalletDisplay handleConnect={handleConnect} />
-            <Button disabled={!state.keys} onClick={startUp}>
-              Connect to Waku
-            </Button>
-            <Button
-              disabled={state.addressBook![state.address!] !== undefined}
-              onClick={broadcastChatKey}
-            >
-              Broadcast Chatkey
-            </Button>
-          </HStack>
+          <Wrap justify="center" align="center" direction="row">
+            <WrapItem>
+              <WalletDisplay handleConnect={handleConnect} />
+            </WrapItem>
+            <WrapItem>
+              <Button disabled={!state.keys} onClick={startUp}>
+                Connect to Waku
+              </Button>
+            </WrapItem>
+            <WrapItem>
+              <Button
+                disabled={state.addressBook![state.address!] !== undefined}
+                onClick={broadcastChatKey}
+              >
+                Broadcast Chatkey
+              </Button>
+            </WrapItem>
+          </Wrap>
           <SlideFade in={state.waku !== undefined}>
             <ChatBox />
           </SlideFade>

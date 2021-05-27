@@ -1,6 +1,5 @@
 import {
   Box,
-  Center,
   FormControl,
   FormErrorMessage,
   Heading,
@@ -9,7 +8,8 @@ import {
   Input,
   SlideFade,
   VStack,
-  Text
+  Text,
+  Tooltip
 } from "@chakra-ui/react";
 import { WakuMessage } from "js-waku";
 import React from "react";
@@ -25,6 +25,7 @@ const ChatBox = () => {
   const [messageList, setList] = React.useState<message[]>([]);
   const [msgText, setMsg] = React.useState("");
   const [toAddress, setTo] = React.useState("");
+
 
   React.useEffect(() => {
     const updatedList =
@@ -62,12 +63,12 @@ const ChatBox = () => {
         }
       >
         <HStack>
-          <Input
+          <Input maxWidth="30vw"
             value={toAddress}
             placeholder="Address"
             onChange={(evt) => setTo(evt.target.value)}
           />
-          <Input
+          <Input minWidth="30vw"
             value={msgText}
             placeholder="Enter a message"
             onChange={(evt) => setMsg(evt.target.value)}
@@ -99,10 +100,12 @@ const ChatBox = () => {
       </HStack>
       {messageList.map((msg: message) => {
         return (
-          <HStack w="75vw" spacing="24px">
+          <HStack key={msg.from+Math.random()} w="75vw" spacing="24px">
             <HStack w="150px">
               <Jazzicon diameter={20} seed={jsNumberForAddress(msg.from)} />
-              <Text>{formatAddress(state.reverseAddressBook![msg.from])}</Text>
+              <Tooltip hasArrow label="Click to copy" aria-label="copy">
+                <Text cursor="pointer" onClick={() => navigator.clipboard.writeText(state.reverseAddressBook![msg.from])}>{formatAddress(state.reverseAddressBook![msg.from])}</Text>
+              </Tooltip>
             </HStack>
             <Box>{msg.message}</Box>
           </HStack>

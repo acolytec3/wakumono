@@ -35,7 +35,7 @@ const WalletDisplay: React.FC<WalletProps> = ({ handleConnect }) => {
       {state.address ? (
         <Popover placement="top">
           <PopoverTrigger>
-            <Button w="200px">
+            <Button minWidth="200px">
               {formatAddress(state.address)}
             </Button>
           </PopoverTrigger>
