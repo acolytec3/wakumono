@@ -12,7 +12,7 @@ import {
 import Onboard from "bnc-onboard";
 import EthCrypto from "eth-crypto";
 import { ethers } from "ethers";
-import { StoreCodec, Waku, WakuMessage } from "js-waku";
+import { Environment, getStatusFleetNodes, StoreCodec, Waku, WakuMessage } from "js-waku";
 import { Direction } from "js-waku/build/main/lib/waku_store/history_rpc";
 import PeerId from "peer-id";
 import React from "react";
@@ -150,7 +150,7 @@ function App() {
           },
         },
       });
-
+/*
       waku.addPeerToAddressBook(
         "16Uiu2HAmPLe7Mzm8TsYUubgCAW1aJoeFScxrLj8ppHFivPo97bUZ",
         ["/dns4/node-01.do-ams3.jdev.misc.statusim.net/tcp/7010/wss"]
@@ -162,15 +162,15 @@ function App() {
           "/dns4/node-01.gc-us-central1-a.wakuv2.prod.statusim.net/tcp/443/wss/p2p/16Uiu2HAmVkKntsECaYfefR1V2yCR79CegLATuTPE6B9TxgxBiiiA",
         ]
       );
-
-      /*    
+*/
+      
       const nodes = await getStatusFleetNodes(Environment.Prod);
       await Promise.all(
         nodes.map((addr) => {
           return waku.dial(addr);
         })
       );
-*/
+
       dispatch({ type: "START_WAKU", payload: { waku: waku } });
       waku.relay.addObserver(handleChatMessage, [ChatContentTopic]);
       waku.relay.addObserver(handleAddressBroadcastMessage, [
