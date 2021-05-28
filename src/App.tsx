@@ -220,6 +220,7 @@ function App() {
       { walletName: "status", preferred: true },
       { walletName: "trust", preferred: true }
     ];
+
     const onboard = Onboard({
       networkId: 1,
       subscriptions: {
@@ -245,14 +246,18 @@ function App() {
       walletSelect: {
         wallets: wallets,
       },
+      walletCheck: [{ checkName: 'connect' }]
     });
 
-    dispatch({ type: "SET_ONBOARD", payload: { onboard: onboard } });
+    //@ts-ignore
+    window.ethereum.enable();
     try {
       await onboard.walletSelect();
     } catch (err) {
       console.log(err);
     }
+    dispatch({ type: "SET_ONBOARD", payload: { onboard: onboard } });
+
   };
 
   return (
