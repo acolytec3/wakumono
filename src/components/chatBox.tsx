@@ -28,11 +28,7 @@ const ChatBox = () => {
 
 
   React.useEffect(() => {
-    const updatedList =
-      state.messageList.length < 10
-        ? state.messageList
-        : state.messageList.slice(state.messageList.length - 11);
-    setList(updatedList);
+    setList(state.messageList);
   }, [state.messageList]);
 
   const handleMessageSend = async (to: string, msgText: string) => {
@@ -54,15 +50,15 @@ const ChatBox = () => {
     setMsg("");
   };
 
-  return (
+  return ( 
     <VStack mw="90vw">
       <FormControl
         minHeight="100px"
         isInvalid={
           toAddress !== "" && state.addressBook![toAddress] === undefined
         }
-      >
-        <HStack>
+      > 
+        <HStack >
           <Input maxWidth="30vw"
             value={toAddress}
             placeholder="Address"
@@ -97,7 +93,8 @@ const ChatBox = () => {
           Sender
         </Box>
         <Box fontWeight="bold">Message</Box>
-      </HStack>
+      </HStack>{/*@ts-ignore */}
+      <VStack sx={{overflow: "scroll"}} maxHeight="100vh">
       {messageList.map((msg: message) => {
         return (
           <HStack key={msg.from+Math.random()} w="75vw" spacing="24px">
@@ -110,7 +107,7 @@ const ChatBox = () => {
             <Box>{msg.message}</Box>
           </HStack>
         );
-      })}
+      })}</VStack>
     </VStack>
   );
 };

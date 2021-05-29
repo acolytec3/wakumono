@@ -30,7 +30,7 @@ function App() {
   const toast = useToast();
 
   const handleChatMessage = async (wakuMsg: WakuMessage) => {
-    if (wakuMsg.payload && state.keys && state.reverseAddressBook) {
+    if (wakuMsg.payload && state.keys && state.reverseAddressBook !== {}) {
       try {
         const decryptedMessage = await EthCrypto.decryptWithPrivateKey(
           state.keys!.privateKey,
@@ -44,7 +44,7 @@ function App() {
         dispatch({
           type: "ADD_MESSAGE",
           payload: {
-            from: state.reverseAddressBook[childKeyVer],
+            from: childKeyVer ?? "unknown sender",
             message: decryptedPayload.message,
           },
         });
@@ -52,7 +52,7 @@ function App() {
           position: "bottom",
           title:
             "Message received from " +
-            formatAddress(state.reverseAddressBook[childKeyVer]),
+            formatAddress(childKeyVer),
           description: decryptedPayload.message,
           status: "success",
           duration: 3000,
@@ -63,6 +63,7 @@ function App() {
       }
     }
   };
+
   const handleHistoricalChatMessage = async (wakuMsg: WakuMessage) => {
     if (wakuMsg.payload && state.keys && state.reverseAddressBook) {
       try {
@@ -262,10 +263,10 @@ function App() {
 
   return (
     <GlobalContext.Provider value={{ dispatch, state }}>
-      <Center h="90vh" mw="95vw">
-        <VStack>
-          <Heading>WakuMono</Heading>
-          <Wrap justify="center" align="center" direction="row">
+      <Center h="95vh" mw="95vw">
+        <VStack> 
+          <Heading>WakuMono</Heading>{/*@ts-ignore*/}
+          <Wrap sx={{ position: '-webkit-sticky', /* Safari */ position: 'sticky', top: '0' }}justify="center" align="center" direction="row">
             <WrapItem>
               <WalletDisplay handleConnect={handleConnect} />
             </WrapItem>
