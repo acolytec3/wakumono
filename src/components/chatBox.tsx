@@ -52,13 +52,14 @@ const ChatBox = () => {
 
   return ( 
     <VStack mw="90vw">
-      <FormControl
+      <FormControl /* @ts-ignore */ 
+      sx={{ position: '-webkit-sticky', /* Safari */ position: 'sticky', top: '5px' }}
         minHeight="100px"
         isInvalid={
           toAddress !== "" && state.addressBook![toAddress] === undefined
         }
       > 
-        <HStack >
+        <HStack  bg="white" opacity="1">
           <Input maxWidth="30vw"
             value={toAddress}
             placeholder="Address"

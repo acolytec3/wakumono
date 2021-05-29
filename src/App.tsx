@@ -265,7 +265,7 @@ function App() {
       <Center h="95vh" mw="95vw">
         <VStack> 
           <Heading>WakuMono</Heading>{/*@ts-ignore*/}
-          <Wrap sx={{ position: '-webkit-sticky', /* Safari */ position: 'sticky', top: '0' }}justify="center" align="center" direction="row">
+          <Wrap justify="center" align="center" direction="row">
             <WrapItem>
               <WalletDisplay handleConnect={handleConnect} />
             </WrapItem>
