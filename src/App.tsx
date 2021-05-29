@@ -51,8 +51,7 @@ function App() {
         toast({
           position: "bottom",
           title:
-            "Message received from " +
-            formatAddress(childKeyVer),
+            "Message received",
           description: decryptedPayload.message,
           status: "success",
           duration: 3000,
