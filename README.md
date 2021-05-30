@@ -20,3 +20,10 @@ Messages can currently only be sent to addresses that have already broadcast the
 ## Technical Details
 
 Wakumono derives chatkeys for securing communication via the [Eth-Crypto](https://github.com/pubkey/eth-crypto) module.  Chatkeys are derived by generating a signature using your ethereum address as a source of randomness to generate a set of child keys which conform to the [ED25519 spec](https://ed25519.cr.yp.to/) which are used to encrypt and decrypt messages.  The public key for this chatkey is broadcasted to the Waku network along with a message linking it to the parent Ethereum address along with as separate signature verifying that the child key belongs to the parent key.  
+
+## OxHack Bounty Details
+
+This project is being submitted for the below two bounties:
+
+[Build a Social Dapp](https://gitcoin.co/issue/status-im/0xHack/1/100025679)
+[Leverage JS-Waku for Private Messaging](https://gitcoin.co/issue/status-im/0xHack/3/100025685)
